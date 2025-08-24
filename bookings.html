@@ -3,22 +3,49 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Bookings - House Booking</title>
+  <title>My Bookings</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    .login-box {
+      border: 1px solid #ddd;
+      padding: 15px;
+      margin: 20px auto;
+      max-width: 300px;
+      text-align: center;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    .login-box input {
+      width: 90%;
+      padding: 8px;
+      margin: 8px 0;
+    }
+    .login-box button {
+      padding: 8px 15px;
+      background: #007bff;
+      border: none;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .login-box button:hover {
+      background: #0056b3;
+    }
+  </style>
 </head>
 <body>
-  <header>
-    <h1>My Bookings</h1>
-    <nav>
-      <a href="index.html">Home</a>
-      <a href="add-house.html">Add House</a>
-      <a href="login.html">Login</a>
-    </nav>
-  </header>
+  <h1>My Bookings</h1>
 
-  <main>
-    <div id="bookingsList" class="house-list"></div>
-  </main>
+  <!-- 🔥 Simple Login Form -->
+  <div class="login-box">
+    <h3>Login</h3>
+    <input type="email" id="email" placeholder="Enter email"><br>
+    <input type="password" id="password" placeholder="Enter password"><br>
+    <button id="loginBtn">Login</button>
+  </div>
+
+  <!-- 🔥 Bookings List -->
+  <div id="myBookings"></div>
 
   <script type="module" src="bookings.js"></script>
 </body>
