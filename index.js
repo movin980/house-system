@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// 🔑 Firebase config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAFmQUaciIIcNZHGlSXBLu0I3sp4YENdvE",
   authDomain: "housebookingsystem.firebaseapp.com",
@@ -13,23 +13,21 @@ const firebaseConfig = {
   measurementId: "G-8NNE50F62B"
 };
 
-// ✅ Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
 const housesList = document.getElementById("housesList");
 
-// Load all houses
-async function loadHouses(user) {
+// ✅ Load Houses
+async function loadHouses() {
+  housesList.innerHTML = "";
+
   const querySnapshot = await getDocs(collection(db, "houses"));
-  housesList.innerHTML = ""; // clear
+  querySnapshot.forEach((docSnap) => {
+    const house = docSnap.data();
+    const houseId = docSnap.id;
 
-  querySnapshot.forEach((doc) => {
-    const house = doc.data();
-    const houseId = doc.id;
-
-    // Create house card
     const div = document.createElement("div");
     div.classList.add("house-card");
     div.innerHTML = `
@@ -39,37 +37,34 @@ async function loadHouses(user) {
       <button class="book-btn">Book</button>
     `;
 
-    // Book button
-    const btn = div.querySelector(".book-btn");
-    btn.addEventListener("click", async () => {
-      if (!user) {
-        alert("Please login to book this house.");
-        return;
-      }
-
-      try {
-        await addDoc(collection(db, "bookings"), {
-          userId: user.uid,
-          houseId: houseId,
-          houseTitle: house.title,
-          housePrice: house.price,
-          houseLocation: house.location,
-          status: "pending",
-          createdAt: new Date()
-        });
-
-        alert("Booking request sent successfully!");
-      } catch (err) {
-        console.error("Booking error:", err);
-        alert("Failed to book house. Try again.");
-      }
+    // ✅ Booking button
+    div.querySelector(".book-btn").addEventListener("click", async () => {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          try {
+            await addDoc(collection(db, "bookings"), {
+              userId: user.uid,
+              houseId: houseId,
+              houseTitle: house.title || "Untitled",
+              houseLocation: house.location || "N/A",
+              housePrice: house.price || "N/A",
+              status: "pending",
+              createdAt: new Date()
+            });
+            alert("✅ Booking request sent!");
+          } catch (error) {
+            console.error("Error booking house:", error);
+            alert("❌ Error while booking. Try again.");
+          }
+        } else {
+          alert("Please login to book a house.");
+        }
+      });
     });
 
     housesList.appendChild(div);
   });
 }
 
-// Track auth state
-onAuthStateChanged(auth, (user) => {
-  loadHouses(user);
-});
+// Load houses on page start
+loadHouses();
