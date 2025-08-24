@@ -1,8 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ✅ Firebase config
+// ✅ Firebase Config
 const firebaseConfig = {
   apiKey: "AIzaSyAFmQUaciIIcNZHGlSXBLu0I3sp4YENdvE",
   authDomain: "housebookingsystem.firebaseapp.com",
@@ -13,34 +13,39 @@ const firebaseConfig = {
   measurementId: "G-8NNE50F62B"
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const bookingsList = document.getElementById("bookingsList");
+const myBookings = document.getElementById("myBookings");
 
 onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    bookingsList.innerHTML = "<p>Please <a href='login.html'>login</a> to see your bookings.</p>";
-    return;
-  }
+  if (user) {
+    myBookings.innerHTML = "";
 
-  const q = query(collection(db, "bookings"), where("userId", "==", user.uid));
-  const querySnapshot = await getDocs(q);
+    const q = query(collection(db, "bookings"), where("userId", "==", user.uid));
+    const querySnapshot = await getDocs(q);
 
-  if (querySnapshot.empty) {
-    bookingsList.innerHTML = "<p>You have no bookings yet.</p>";
-    return;
-  }
+    if (querySnapshot.empty) {
+      myBookings.innerHTML = "<p>No bookings yet.</p>";
+    }
 
-  querySnapshot.forEach((doc) => {
-    const booking = doc.data();
-    bookingsList.innerHTML += `
-      <div class="house-card">
+    querySnapshot.forEach((docSnap) => {
+      const booking = docSnap.data();
+
+      const div = document.createElement("div");
+      div.classList.add("house-card");
+
+      div.innerHTML = `
         <h3>${booking.houseTitle}</h3>
-        <p>Status: ${booking.status || "pending"}</p>
-      </div>
-    `;
-  });
+        <p>Location: ${booking.houseLocation}</p>
+        <p>Price: KES ${booking.housePrice}</p>
+        <p>Status: <strong>${booking.status}</strong></p>
+      `;
+
+      myBookings.appendChild(div);
+    });
+  } else {
+    myBookings.innerHTML = "<p>Please login to view your bookings.</p>";
+  }
 });
